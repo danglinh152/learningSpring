@@ -52,17 +52,17 @@ public class SecurityUtil {
         return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
 
-    public boolean isTokenExpired(String token) {
-        try {
-            Jwt jwt = jwtDecoder.decode(token); // Giải mã token
-            Instant expiration = jwt.getExpiresAt(); // Lấy thời gian hết hạn
-            // Kiểm tra xem token đã hết hạn chưa
-            return expiration != null && expiration.isBefore(Instant.now());
-        } catch (JwtException e) {
-            // Nếu có lỗi trong việc giải mã, coi như token không hợp lệ
-            return true;
-        }
-    }
+//    public boolean isTokenExpired(String token) {
+//        try {
+//            Jwt jwt = jwtDecoder.decode(token); // Giải mã token
+//            Instant expiration = jwt.getExpiresAt(); // Lấy thời gian hết hạn
+//            // Kiểm tra xem token đã hết hạn chưa
+//            return expiration != null && expiration.isBefore(Instant.now());
+//        } catch (JwtException e) {
+//            // Nếu có lỗi trong việc giải mã, coi như token không hợp lệ
+//            return true;
+//        }
+//    }
 
     public static Optional<String> getCurrentUserLogin() {
         SecurityContext securityContext = SecurityContextHolder.getContext();

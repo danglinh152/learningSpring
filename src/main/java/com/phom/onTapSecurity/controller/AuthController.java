@@ -1,8 +1,10 @@
 package com.phom.onTapSecurity.controller;
 
 
-import com.phom.onTapSecurity.domain.DTO.UserDTO;
-import com.phom.onTapSecurity.domain.DTO.ResponseToken;
+import com.phom.onTapSecurity.domain.DTO.LoginDTO;
+import com.phom.onTapSecurity.domain.DTO.ResLoginDTO;
+import com.phom.onTapSecurity.domain.User;
+import com.phom.onTapSecurity.service.UserService;
 import com.phom.onTapSecurity.util.SecurityUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,21 +15,25 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/api/v1")
 public class AuthController {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final SecurityUtil securityUtil;
+    private final UserService userService;
 
-    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil) {
+    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, UserService userService) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
+        this.userService = userService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> login(@RequestBody LoginDTO userDTO) {
         try {
             // Tạo đối tượng Authentication từ username và password
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
@@ -37,14 +43,20 @@ public class AuthController {
             Authentication authentication = authenticationManagerBuilder.getObject()
                     .authenticate(usernamePasswordAuthenticationToken);
 
+            User currentUser = userService.findByUsername(userDTO.getUsername());
+
             // Tạo token truy cập
-            ResponseToken accessToken = new ResponseToken(securityUtil.createToken(authentication));
+            String accessToken = securityUtil.createToken(authentication);
+            ResLoginDTO resLoginDTO = new ResLoginDTO();
+            resLoginDTO.setToken(accessToken);
+            ResLoginDTO.UserLoginDTO userLoginDTO = new ResLoginDTO.UserLoginDTO(currentUser.getId(), currentUser.getEmail(), currentUser.getFirstName(), currentUser.getLastName());
+            resLoginDTO.setUser(userLoginDTO);
 
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             // Trả về token
-            return ResponseEntity.ok(accessToken.getToken());
+            return ResponseEntity.ok(resLoginDTO);
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         } catch (Exception e) {
@@ -52,7 +64,6 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
         }
     }
-
 
 
 }

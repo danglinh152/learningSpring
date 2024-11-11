@@ -74,10 +74,7 @@ public class User {
         this.updatedAt = Instant.now();
         this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
     }
-
-    public void updateUser(User userOrigin) {
-
-    }
+    
 
 //    public User() {
 //    }

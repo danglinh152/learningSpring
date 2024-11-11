@@ -1,30 +1,24 @@
 package com.phom.onTapSecurity.controller;
 
 
-import com.phom.onTapSecurity.domain.Company;
-import com.phom.onTapSecurity.domain.DTO.ResponseToken;
+import com.phom.onTapSecurity.domain.DTO.UserDTO;
+import com.phom.onTapSecurity.domain.Message;
 import com.phom.onTapSecurity.domain.ResultPagination;
 import com.phom.onTapSecurity.domain.User;
 import com.phom.onTapSecurity.service.UserService;
 import com.phom.onTapSecurity.util.SecurityUtil;
 import com.turkraft.springfilter.boot.Filter;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.PageRequest;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-
 @RestController
+@RequestMapping("/api/v1")
 public class UserController {
     private final UserService userService;
 
@@ -52,26 +46,34 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> post(@RequestBody User userParam, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<?> post(@RequestBody User userParam) {
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //        if (authentication == null || !authentication.isAuthenticated() ||
 //                securityUtil.isTokenExpired(jwt.getTokenValue())) {
 //            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 //        }
-
+        if (userService.isEmailExist(userParam.getEmail())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Message("Email existed!"));
+        }
         // Tiến hành thêm người dùng mới
         User user = new User();
         user.setPassword(passwordEncoder.encode(userParam.getPassword()));
         user.setFirstName(userParam.getFirstName());
         user.setLastName(userParam.getLastName());
         user.setEmail(userParam.getEmail());
+        user.setGender(userParam.getGender());
+        user.setAddress(userParam.getAddress());
+        user.setAge(userParam.getAge());
+
+
+        UserDTO userDTO = new UserDTO(user);
         userService.addUser(user);
 
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userDTO);
     }
 
     @PutMapping("/users")
-    public ResponseEntity<User> putUser(@RequestBody @Valid User user) {
+    public ResponseEntity<UserDTO> putUser(@RequestBody @Valid User user) {
         User userOrigin = userService.findById(user.getId());
         userOrigin.setFirstName(user.getFirstName());
         userOrigin.setLastName(user.getLastName());
@@ -80,13 +82,14 @@ public class UserController {
         userOrigin.setAge(user.getAge());
         userOrigin.setAddress(user.getAddress());
 
-        userOrigin.updateUser(userOrigin);
-        return ResponseEntity.ok(userOrigin);
+        UserDTO userDTO = new UserDTO(userOrigin);
+        userService.updateUser(userOrigin);
+        return ResponseEntity.ok(userDTO);
     }
 
 
-    @DeleteMapping("/users")
-    public ResponseEntity<String> delete(@RequestParam(name = "id") long id) {
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<String> delete(@PathVariable Long id) {
         userService.deleteUserById(id);
         return ResponseEntity.ok("Deleted");
     }

@@ -55,4 +55,8 @@ public class UserService {
     public void updateUser(User user) {
         userRepository.save(user);
     }
+
+    public boolean isEmailExist(String email) {
+        return userRepository.existsByEmail(email);
+    }
 }
