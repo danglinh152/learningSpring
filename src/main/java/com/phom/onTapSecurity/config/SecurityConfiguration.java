@@ -41,7 +41,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(c -> c.disable())
                 .authorizeRequests(auth -> auth
-                                .requestMatchers(HttpMethod.POST, "/api/v1/login").permitAll() // Chỉ cho phép POST đến /login
+                                .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll() // Chỉ cho phép POST đến /login
                                 .requestMatchers(HttpMethod.GET, "/api/v1/test").permitAll()
                                 .anyRequest().authenticated()
 //                                .anyRequest().permitAll()

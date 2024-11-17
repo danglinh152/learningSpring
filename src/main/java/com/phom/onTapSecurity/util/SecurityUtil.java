@@ -1,6 +1,7 @@
 package com.phom.onTapSecurity.util;
 
 
+import com.phom.onTapSecurity.domain.DTO.ResLoginDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -13,6 +14,8 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -22,29 +25,55 @@ public class SecurityUtil {
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
 
-    @Value("${danglinh.jwt.token-validity-in-seconds}")
-    private long tokenExpiration;
+    @Value("${danglinh.jwt.access-token-validity-in-seconds}")
+    private long accessTokenExpiration;
+
+    @Value("${danglinh.jwt.refresh-token-validity-in-seconds}")
+    private long refreshTokenExpiration;
 
     public SecurityUtil(JwtEncoder jwtEncoder, @Qualifier("jwtDecoder") JwtDecoder jwtDecoder) {
         this.jwtEncoder = jwtEncoder;
         this.jwtDecoder = jwtDecoder;
     }
 
-    public String createToken(Authentication authentication) {
+    public String createAccessToken(String email, ResLoginDTO.UserLoginDTO userLoginDTO) {
         // Lấy danh sách quyền của người dùng
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(" "));
+//        String authorities = authentication.getAuthorities().stream()
+//                .map(GrantedAuthority::getAuthority)
+//                .collect(Collectors.joining(" "));
 
         Instant now = Instant.now();
-        Instant validity = now.plusSeconds(tokenExpiration); // Đảm bảo tokenExpiration là dương
+        Instant validity = now.plusSeconds(accessTokenExpiration); // Đảm bảo tokenExpiration là dương
+
+        List<String> listAuthorities = new ArrayList<>();
+        listAuthorities.add("ROLE_USER");
+        listAuthorities.add("ROLE_ADMIN");
 
         // Tạo claims cho token
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(validity)
-                .subject(authentication.getName())
-                .claim("authorities", authorities)
+                .subject(email)
+                .claim("user", userLoginDTO)
+                .claim("authorities", listAuthorities)
+                .build();
+
+        // Tạo header cho token
+        JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
+        return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
+    }
+
+    public String createRefreshToken(String email, ResLoginDTO resLoginDTO) {
+
+        Instant now = Instant.now();
+        Instant validity = now.plusSeconds(refreshTokenExpiration); // Đảm bảo tokenExpiration là dương
+
+        // Tạo claims cho token
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuedAt(now)
+                .expiresAt(validity)
+                .subject(email)
+                .claim("user", resLoginDTO.getUser())
                 .build();
 
         // Tạo header cho token

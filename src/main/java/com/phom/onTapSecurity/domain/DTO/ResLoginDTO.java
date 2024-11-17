@@ -1,15 +1,17 @@
 package com.phom.onTapSecurity.domain.DTO;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResLoginDTO {
+
+    @JsonProperty("access_token")
     private String token;
     private UserLoginDTO user;
 
@@ -21,6 +23,13 @@ public class ResLoginDTO {
         private String email;
         private String firstName;
         private String lastName;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class GetAccountDTO {
+        private UserLoginDTO user;
     }
 
 }
