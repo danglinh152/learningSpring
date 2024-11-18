@@ -1,4 +1,4 @@
-package com.phom.onTapSecurity.domain.DTO;
+package com.phom.onTapSecurity.domain.DTO.response;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;

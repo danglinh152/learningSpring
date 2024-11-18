@@ -1,14 +1,11 @@
 package com.phom.onTapSecurity.controller;
 
 
-import com.nimbusds.jose.util.Base64;
-import com.phom.onTapSecurity.domain.DTO.LoginDTO;
-import com.phom.onTapSecurity.domain.DTO.ResLoginDTO;
-import com.phom.onTapSecurity.domain.Message;
+import com.phom.onTapSecurity.domain.DTO.request.ReqLoginDTO;
+import com.phom.onTapSecurity.domain.DTO.response.ResLoginDTO;
 import com.phom.onTapSecurity.domain.User;
 import com.phom.onTapSecurity.service.UserService;
 import com.phom.onTapSecurity.util.SecurityUtil;
-import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,13 +17,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.web.bind.annotation.*;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import static com.phom.onTapSecurity.util.SecurityUtil.JWT_ALGORITHM;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -47,7 +38,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDTO userDTO) {
+    public ResponseEntity<?> login(@RequestBody ReqLoginDTO userDTO) {
         try {
             // Tạo đối tượng Authentication từ username và password
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =

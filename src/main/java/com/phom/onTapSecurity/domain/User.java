@@ -2,6 +2,7 @@ package com.phom.onTapSecurity.domain;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.phom.onTapSecurity.util.SecurityUtil;
 import com.phom.onTapSecurity.util.constant.GenderEnum;
 import jakarta.persistence.*;
@@ -63,6 +64,10 @@ public class User {
     @Column(name = "updated_by")
     private String updatedBy;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
+
     @PrePersist
     public void handleCreate() {
         this.createdAt = Instant.now();
@@ -74,7 +79,7 @@ public class User {
         this.updatedAt = Instant.now();
         this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
     }
-    
+
 
 //    public User() {
 //    }

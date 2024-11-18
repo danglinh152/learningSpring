@@ -1,8 +1,8 @@
 package com.phom.onTapSecurity.service;
 
 import com.nimbusds.jose.util.Base64;
-import com.phom.onTapSecurity.domain.Meta;
-import com.phom.onTapSecurity.domain.ResultPagination;
+import com.phom.onTapSecurity.domain.DTO.response.ResResultPaginationDTO;
+import com.phom.onTapSecurity.domain.DTO.response.ResUserDTO;
 import com.phom.onTapSecurity.domain.User;
 import com.phom.onTapSecurity.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.phom.onTapSecurity.util.SecurityUtil.JWT_ALGORITHM;
 
@@ -29,19 +32,34 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public ResultPagination getAllUser(Specification<User> spec, Pageable pageable) {
+    public ResResultPaginationDTO getAllUser(Specification<User> spec, Pageable pageable) {
         Page<User> pageUsers = userRepository.findAll(spec, pageable);
 
-        Meta mt = new Meta();
+        ResResultPaginationDTO.Meta mt = new ResResultPaginationDTO.Meta();
         mt.setPage(pageUsers.getNumber() + 1);
         mt.setPageSize(pageUsers.getSize());
         mt.setTotalPages(pageUsers.getTotalPages());
         mt.setTotalElements(pageUsers.getTotalElements());
 
-        ResultPagination rs = new ResultPagination();
+        ResResultPaginationDTO rs = new ResResultPaginationDTO();
 
         rs.setMeta(mt);
-        rs.setData(pageUsers.getContent());
+
+        List<ResUserDTO> users = pageUsers.getContent().stream().map(item -> new ResUserDTO(
+                item.getId(),
+                item.getFirstName(),
+                item.getLastName(),
+                item.getEmail(),
+                item.getAge(),
+                item.getGender(),
+                item.getAddress(),
+                new ResUserDTO.ResCompanyDTO(
+                        item.getCompany() != null ? item.getCompany().getId() : 0,
+                        item.getCompany() != null ? item.getCompany().getName() : null
+                )
+        )).collect(Collectors.toList());
+
+        rs.setData(users);
 
 
         return rs;
@@ -99,5 +117,23 @@ public class UserService {
     public void deleteRefreshTokenByEmail(String email) {
         User user = userRepository.findByEmail(email);
         user.setRefreshToken(null);
+    }
+
+    public ResUserDTO convertToResUserDTO(User user) {
+        ResUserDTO resUserDTO = new ResUserDTO();
+
+        resUserDTO.setFirstName(user.getFirstName());
+        resUserDTO.setLastName(user.getLastName());
+        resUserDTO.setEmail(user.getEmail());
+        resUserDTO.setAge(user.getAge());
+        resUserDTO.setGender(user.getGender());
+        resUserDTO.setAddress(user.getAddress());
+        if (user.getCompany() != null) {
+            resUserDTO.setCompany(new ResUserDTO.ResCompanyDTO(user.getCompany().getId(), user.getCompany().getName()));
+        } else {
+            resUserDTO.setCompany(null);
+        }
+
+        return resUserDTO;
     }
 }

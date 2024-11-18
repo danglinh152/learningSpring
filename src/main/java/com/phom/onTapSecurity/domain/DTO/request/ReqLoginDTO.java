@@ -1,4 +1,4 @@
-package com.phom.onTapSecurity.domain.DTO;
+package com.phom.onTapSecurity.domain.DTO.request;
 
 
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginDTO {
+public class ReqLoginDTO {
     private String username;
     private String password;
 }

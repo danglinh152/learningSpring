@@ -1,11 +1,10 @@
 package com.phom.onTapSecurity.util;
 
 
-import com.phom.onTapSecurity.domain.DTO.ResLoginDTO;
+import com.phom.onTapSecurity.domain.DTO.response.ResLoginDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +16,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class SecurityUtil {

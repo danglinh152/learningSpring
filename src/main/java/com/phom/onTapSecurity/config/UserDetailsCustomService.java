@@ -1,6 +1,7 @@
-package com.phom.onTapSecurity.service;
+package com.phom.onTapSecurity.config;
 
 import com.phom.onTapSecurity.domain.User;
+import com.phom.onTapSecurity.service.UserService;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
