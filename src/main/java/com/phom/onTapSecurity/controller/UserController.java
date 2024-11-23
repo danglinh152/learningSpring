@@ -3,11 +3,13 @@ package com.phom.onTapSecurity.controller;
 
 import com.phom.onTapSecurity.domain.Company;
 import com.phom.onTapSecurity.domain.DTO.response.ResUserDTO;
+import com.phom.onTapSecurity.domain.DTO.response.RestResponse;
 import com.phom.onTapSecurity.domain.Message;
 import com.phom.onTapSecurity.domain.DTO.response.ResResultPaginationDTO;
 import com.phom.onTapSecurity.domain.User;
 import com.phom.onTapSecurity.service.CompanyService;
 import com.phom.onTapSecurity.service.UserService;
+import com.phom.onTapSecurity.service.error.IdInvalidException;
 import com.phom.onTapSecurity.util.SecurityUtil;
 import com.turkraft.springfilter.boot.Filter;
 import jakarta.validation.Valid;
@@ -37,19 +39,21 @@ public class UserController {
 
     @GetMapping("/users")
     public ResponseEntity<ResResultPaginationDTO> get(@Filter Specification<User> spec, Pageable pageable) {
-
         return ResponseEntity.ok(userService.getAllUser(spec, pageable));
     }
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<ResUserDTO> get(@PathVariable Long id) {
+    public ResponseEntity<ResUserDTO> get(@PathVariable Long id) throws IdInvalidException {
 
         User user = userService.findById(id);
 
-        ResUserDTO resUserDTO = userService.convertToResUserDTO(user);
+        if (user == null) {
+            throw new IdInvalidException("ID is not match");
+        } else {
+            ResUserDTO resUserDTO = userService.convertToResUserDTO(user);
 
-
-        return ResponseEntity.ok(resUserDTO);
+            return ResponseEntity.ok(resUserDTO);
+        }
     }
 
     @PostMapping("/users")
